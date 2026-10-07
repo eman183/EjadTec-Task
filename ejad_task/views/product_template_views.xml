@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+
+<!--    ROP Products-->
+
+    <!-- Product Form -->
+    <record id="product_template_form_view_rop" model="ir.ui.view">
+        <field name="name">product.template.form.rop</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+
+                <button
+                    name="action_view_rop_products"
+                    type="object"
+                    class="oe_stat_button"
+                    icon="fa-refresh">
+
+                    <field
+                        name="rop_product_count"
+                        widget="statinfo"
+                        string="ROP Products"/>
+
+                </button>
+
+            </xpath>
+
+            <xpath expr="//field[@name='categ_id']" position="after">
+
+                <field name="has_rop"/>
+
+                <field
+                    name="rop_count"
+                    invisible="not has_rop"/>
+
+            </xpath>
+
+        </field>
+    </record>
+
+
+    <!-- ROP Tree View -->
+    <record id="product_template_rop_tree_view" model="ir.ui.view">
+        <field name="name">product.template.rop.tree</field>
+        <field name="model">product.template</field>
+        <field name="arch" type="xml">
+
+            <tree string="ROP Products">
+
+                <field name="name"/>
+                <field name="default_code"/>
+                <field name="qty_available"/>
+                <field name="has_rop"/>
+                <field name="rop_count"/>
+
+            </tree>
+
+        </field>
+    </record>
+
+
+    <!-- ROP Form View -->
+    <record id="product_template_rop_form_view" model="ir.ui.view">
+        <field name="name">product.template.rop.form</field>
+        <field name="model">product.template</field>
+        <field name="arch" type="xml">
+
+            <form string="ROP Product">
+
+                <sheet>
+
+                    <div class="oe_button_box" name="button_box"/>
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+
+                    <group>
+
+                        <group>
+                            <field name="default_code"/>
+                            <field name="categ_id"/>
+                        </group>
+
+                        <group>
+                            <field name="has_rop"/>
+                            <field
+                                name="rop_count"
+                                invisible="not has_rop"/>
+                            <field name="qty_available"/>
+                        </group>
+
+                    </group>
+
+                </sheet>
+
+            </form>
+
+        </field>
+    </record>
+
+
+    <!-- ROP Kanban -->
+    <record id="product_template_rop_kanban_view" model="ir.ui.view">
+        <field name="name">product.template.rop.kanban</field>
+        <field name="model">product.template</field>
+        <field name="arch" type="xml">
+
+            <kanban>
+
+                <field name="name"/>
+                <field name="default_code"/>
+                <field name="qty_available"/>
+                <field name="rop_count"/>
+
+                <templates>
+
+                    <t t-name="card">
+
+                        <div class="oe_kanban_global_click">
+
+                            <strong>
+                                <field name="name"/>
+                            </strong>
+
+                            <div>
+                                Internal Reference:
+                                <field name="default_code"/>
+                            </div>
+
+                            <div>
+                                Current Stock:
+                                <field name="qty_available"/>
+                            </div>
+
+                            <div>
+                                ROP:
+                                <field name="rop_count"/>
+                            </div>
+
+                            <t t-if="record.qty_available.raw_value &lt; record.rop_count.raw_value">
+
+                                <div class="text-danger">
+                                    <strong>
+                                        Below ROP
+                                    </strong>
+                                </div>
+
+                            </t>
+
+                        </div>
+
+                    </t>
+
+                </templates>
+
+            </kanban>
+
+        </field>
+    </record>
+
+
+    <record id="action_rop_products" model="ir.actions.act_window">
+
+        <field name="name">ROP Products</field>
+
+        <field name="res_model">product.template</field>
+
+        <field name="view_mode">tree,form,kanban</field>
+
+        <field name="domain">
+            [('has_rop', '=', True)]
+        </field>
+
+    </record>
+
+
+
+
+<!--    Products > ROP-->
+    <record id="action_products_below_rop" model="ir.actions.act_window">
+
+    <field name="name">Products > ROP</field>
+    <field name="res_model">product.template</field>
+    <field name="view_mode">tree,form,kanban</field>
+
+    <field name="domain">
+        [('below_rop', '=', True)]
+    </field>
+
+</record>
+
+
+
+</odoo>

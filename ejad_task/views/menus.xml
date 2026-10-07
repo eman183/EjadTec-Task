@@ -1,0 +1,23 @@
+<odoo>
+    <data>
+           <!-- ROP Menu -->
+        <menuitem
+            id="menu_rop_root"
+            name="ROP"
+            parent="stock.menu_stock_root"
+            sequence="25"/>
+
+        <menuitem
+            id="menu_rop_products"
+            name="ROP Products"
+            parent="menu_rop_root"
+            action="action_rop_products"
+            sequence="10"/>
+        <menuitem
+        id="menu_products_below_rop"
+        name="Products > ROP"
+        parent="menu_rop_root"
+        action="action_products_below_rop"
+        sequence="20"/>
+    </data>
+</odoo>
