@@ -2,3 +2,5 @@
 
 from . import product_template
 from . import stock_picking
+from . import pos_session
+from . import  pos_config

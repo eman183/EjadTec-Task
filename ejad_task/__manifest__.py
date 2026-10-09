@@ -18,17 +18,27 @@ Long description of module's purpose
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base','product','stock'],
+    'depends': ['base','product','stock','point_of_sale'],
 
     # always loaded
     'data': [
         # 'security/ir.model.access.csv',
         'views/product_template_views.xml',
         'views/menus.xml',
+        'views/pos_config.xml'
     ],
     # only loaded in demonstration mode
     'demo': [
         'demo/demo.xml',
     ],
+'assets': {
+    'point_of_sale._assets_pos': [
+        'ejad_task/static/src/js/pos_rop_validation.js',
+        'ejad_task/static/src/js/payment_screen.js',
+        'ejad_task/static/src/js/cash_now_button.js',
+        'ejad_task/static/src/xml/cash_now_button.xml',
+
+    ],
+},
 }
 

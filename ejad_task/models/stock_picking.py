@@ -14,15 +14,12 @@ class StockPicking(models.Model):
 
             if not picking.scheduled_date:
                 continue
-            print("scheduled_date", picking.scheduled_date)
             scheduled_date = fields.Datetime.context_timestamp(
                 self,
                 picking.scheduled_date
             ).date()
-            print("scheduled_date123:", scheduled_date)
 
             today = fields.Date.context_today(self)
-            print("today:", today)
 
             if scheduled_date < today:
                 raise ValidationError(

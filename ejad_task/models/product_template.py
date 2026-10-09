@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api
+from odoo import models, fields, api,_
+from odoo.exceptions import  ValidationError,UserError
 
 
 class ProductTemplate(models.Model):
@@ -29,7 +30,6 @@ class ProductTemplate(models.Model):
         store=True
     )
 
-    @api.depends('has_rop', 'rop_count', 'qty_available')
     def _compute_below_rop(self):
         for product in self:
             product.below_rop = (
@@ -57,9 +57,9 @@ class ProductTemplate(models.Model):
     def _check_rop_count(self):
         for product in self:
             if product.has_rop and product.rop_count < 0:
-                raise models.ValidationError(
+                raise ValidationError(_(
                     'ROP Count cannot be negative.'
-                )
+                ))
 
     def action_view_rop_products(self):
         self.ensure_one()
@@ -80,3 +80,72 @@ class ProductTemplate(models.Model):
 
             },
         }
+
+
+
+
+class ProductProduct(models.Model):
+    _inherit = 'product.product'
+
+    @api.model
+    def action_notify_rop_admin(self, product_id):
+        product = self.browse(product_id).exists()
+
+        if not product:
+            raise UserError(_("Product not found."))
+
+        template = product.product_tmpl_id
+
+        if not template.has_rop:
+            return False
+
+        available_stock = product.qty_available
+        rop_count = template.rop_count
+
+        if available_stock >= rop_count:
+            return False
+
+        admins = self.env.ref(
+            'stock.group_stock_manager'
+        ).users
+
+        if not admins:
+            return False
+
+        activity_type = self.env.ref(
+            'mail.mail_activity_data_todo'
+        )
+
+        model_id = self.env['ir.model']._get_id(
+            'product.template'
+        )
+        for admin in admins:
+            existing = self.env['mail.activity'].search([
+                ('res_model_id', '=', model_id),
+                ('res_id', '=', template.id),
+                ('user_id', '=', admin.id),
+                ('activity_type_id', '=', activity_type.id),
+                ('summary', '=', 'Check Re-Order Point'),
+            ], limit=1)
+
+            if existing:
+                continue
+
+            self.env['mail.activity'].create({
+                'res_model_id': model_id,
+                'res_id': template.id,
+                'user_id': admin.id,
+                'activity_type_id': activity_type.id,
+                'summary': 'Check Re-Order Point',
+                'note': _(
+                    'Product: %(product)s<br/>'
+                    'Available stock: %(stock)s<br/>'
+                    'Re-Order Point: %(rop)s<br/>'
+                    'Please check stock and arrange replenishment if needed.',
+                    product=product.display_name,
+                    stock=available_stock,
+                    rop=rop_count,
+                ),
+            })
+
+        return True
