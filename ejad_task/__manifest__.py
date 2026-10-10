@@ -18,14 +18,19 @@ Long description of module's purpose
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base','product','stock','point_of_sale'],
+    'depends': ['base','product','stock','point_of_sale','stock_delivery','website_sale'],
 
     # always loaded
     'data': [
-        # 'security/ir.model.access.csv',
+        'security/ir.model.access.csv',
         'views/product_template_views.xml',
         'views/menus.xml',
-        'views/pos_config.xml'
+        'views/pos_config.xml',
+        'views/product_rop_views.xml',
+        'wizard/update_quantity_views.xml',
+        'views/website_rop_templates.xml',
+        'views/website_realtime_rop_templates.xml',
+        'views/website_menus.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
@@ -38,6 +43,9 @@ Long description of module's purpose
         'ejad_task/static/src/js/cash_now_button.js',
         'ejad_task/static/src/xml/cash_now_button.xml',
 
+    ],
+    'web.assets_frontend': [
+        'ejad_task/static/src/js/realtime_rop.js',
     ],
 },
 }

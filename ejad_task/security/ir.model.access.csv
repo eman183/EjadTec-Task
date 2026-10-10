@@ -1,2 +1,2 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-gi
+access_rop_update_quantity_wizard,ejad_task.rop_update_quantity_wizard,model_rop_update_quantity_wizard,base.group_user,1,1,1,1

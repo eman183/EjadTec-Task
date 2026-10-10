@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="website_menu_rop_products" model="website.menu">
+        <field name="name">ROP Products</field>
+        <field name="url">/shop/rop-products</field>
+        <field name="parent_id" ref="website.main_menu"/>
+        <field name="sequence" eval="30"/>
+    </record>
+
+    <template id="website_sale_product_rop_button"
+              inherit_id="website_sale.products_item"
+              name="ROP Product Quantity Button">
+        <xpath expr="//div[hasclass('oe_product_image')]" position="after">
+            <div t-if="rop_products_page" class="text-center mt-2 mb-2">
+                <button type="button"
+                        class="btn btn-primary btn-sm"
+                        data-bs-toggle="modal"
+                        t-att-data-bs-target="'#rop_modal_%s' % product.id">
+                    Update Product Quantity
+                </button>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="website_rop_products_heading"
+              inherit_id="website_sale.products"
+              name="ROP Products Heading">
+        <xpath expr="//div[@id='products_grid']/div[hasclass('products_header')]" position="before">
+            <div t-if="rop_products_page" class="mb-3">
+                <h1 class="h3 mb-1" t-esc="rop_page_title"/>
+                <p class="text-muted mb-0" t-esc="rop_page_subtitle"/>
+            </div>
+        </xpath>
+        <xpath expr="//div[hasclass('o_wsale_products_grid_table_wrapper')]/following-sibling::div/t[1]/h3" position="replace">
+            <h3 class="mt8">
+                <t t-if="rop_products_page" t-esc="rop_page_empty"/>
+                <t t-else="">No product defined</t>
+            </h3>
+        </xpath>
+
+
+        <xpath expr="//div[@id='products_grid']" position="after">
+            <t t-if="rop_products_page">
+                <div t-foreach="products" t-as="rop_product"
+                     class="modal fade"
+                     t-att-id="'rop_modal_%s' % rop_product.id"
+                     tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form action="/rop-product/update" method="post">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Update Product Quantity</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"/>
+                                </div>
+                                <div class="modal-body">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <input type="hidden" name="product_id" t-att-value="rop_product.id"/>
+                                    <input type="hidden" name="redirect" t-att-value="rop_page_url"/>
+                                    <p class="fw-bold" t-esc="rop_product.display_name"/>
+                                    <p class="text-muted small">
+                                        Current quantity: <t t-esc="rop_product.qty_available"/>
+                                        / Reorder point: <t t-esc="rop_product.rop_count"/>
+                                    </p>
+                                    <label class="form-label">New Quantity on Hand</label>
+                                    <input type="number" name="quantity" class="form-control"
+                                           min="0" step="1" required="required"/>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Apply</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </xpath>
+    </template>
+
+</odoo>

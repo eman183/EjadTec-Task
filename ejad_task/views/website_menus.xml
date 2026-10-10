@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- The header is cached per website; warehouse users and everyone else
+         must not share that cache, or the warehouse-only menus leak. -->
+    <template id="website_layout_warehouse_menu_cache"
+              inherit_id="website.layout"
+              priority="99"
+              name="Warehouse Menus Cache Key">
+        <xpath expr="//header/t[@t-cache]" position="attributes">
+            <attribute name="t-cache">None if website.is_menu_cache_disabled() else (xmlid, website, website.is_public_user(), request.env.user.has_group('stock.group_stock_user'))</attribute>
+        </xpath>
+    </template>
+
+</odoo>

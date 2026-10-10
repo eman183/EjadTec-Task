@@ -19,6 +19,8 @@ patch(Order.prototype, {
             }
             const availableStock = product.qty_available;
             const ropCount = product.rop_count;
+            console.log("ropCount",ropCount)
+            console.log("availableStock",availableStock)
 
             if (
                 typeof availableStock === "number" &&

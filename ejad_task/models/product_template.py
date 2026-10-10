@@ -30,6 +30,8 @@ class ProductTemplate(models.Model):
         store=True
     )
 
+
+    @api.depends('has_rop','rop_count','qty_available')
     def _compute_below_rop(self):
         for product in self:
             product.below_rop = (
@@ -81,11 +83,68 @@ class ProductTemplate(models.Model):
             },
         }
 
+    def action_update_rop_quantity(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Update Product Quantity"),
+            "res_model": "rop.update.quantity.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {
+                "default_product_tmpl_id": self.id,
+            },
+        }
+
 
 
 
 class ProductProduct(models.Model):
     _inherit = 'product.product'
+
+    @api.model
+    def _notify_rop_update(self, product, location, quantity):
+        groups = (
+            self.env.ref('base.group_system')
+            | self.env.ref('stock.group_stock_manager')
+            | self.env.ref('stock.group_stock_user')
+        )
+        partners = groups.sudo().users.filtered(
+            lambda user: user.active and user != self.env.user
+        ).partner_id
+        if not partners:
+            return False
+
+        message = _(
+            '%(user)s updated the quantity on hand of %(product)s '
+            'to %(quantity)s at %(location)s.',
+            user=self.env.user.name,
+            product=product.display_name,
+            quantity=quantity,
+            location=location.display_name,
+        )
+        product.product_tmpl_id.message_post(
+            body=message,
+            subject=_('Product quantity updated'),
+            partner_ids=partners.ids,
+            message_type='comment',
+            subtype_xmlid='mail.mt_comment',
+        )
+
+        # Users whose preference is "By Email" get nothing in Odoo when no
+        # mail server is configured, so also push a live notification.
+        Bus = self.env['bus.bus'].sudo()
+        for partner in partners:
+            Bus._sendone(partner, 'simple_notification', {
+                'type': 'warning',
+                'title': _('Product quantity updated'),
+                'message': message,
+                'sticky': True,
+            })
+        return True
+
+
+    POS_ROP_MIN_QTY = 5
 
     @api.model
     def action_notify_rop_admin(self, product_id):
@@ -149,3 +208,4 @@ class ProductProduct(models.Model):
             })
 
         return True
+
