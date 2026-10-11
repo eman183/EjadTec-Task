@@ -27,17 +27,26 @@ class ProductTemplate(models.Model):
     below_rop = fields.Boolean(
         string='Below ROP',
         compute='_compute_below_rop',
-        store=True
+        search='_search_below_rop',
     )
 
 
-    @api.depends('has_rop','rop_count','qty_available')
+    @api.depends('has_rop','rop_count')
     def _compute_below_rop(self):
         for product in self:
             product.below_rop = (
                     product.has_rop
                     and product.qty_available < product.rop_count
             )
+
+    def _search_below_rop(self, operator, value):
+        if operator not in ('=', '!='):
+            raise UserError(_('Unsupported operator for Below ROP.'))
+        products = self.search([('has_rop', '=', True)]).filtered(
+            lambda product: product.qty_available < product.rop_count
+        )
+        positive = (operator == '=') == bool(value)
+        return [('id', 'in' if positive else 'not in', products.ids)]
 
     @api.depends('has_rop','rop_count')
     def _compute_rop_product_count(self):
