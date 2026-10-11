@@ -147,7 +147,7 @@ class ProductProduct(models.Model):
     POS_ROP_MIN_QTY = 5
 
     @api.model
-    def action_notify_rop_admin(self, product_id):
+    def action_notify_rop_admin(self, product_id, ordered_qty=0):
         product = self.browse(product_id).exists()
 
         if not product:
@@ -158,7 +158,7 @@ class ProductProduct(models.Model):
         if not template.has_rop:
             return False
 
-        available_stock = product.qty_available
+        available_stock = product.qty_available - (ordered_qty or 0)
         rop_count = template.rop_count
 
         if available_stock >= rop_count:
